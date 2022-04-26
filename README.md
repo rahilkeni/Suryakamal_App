@@ -1,3 +1,5 @@
+The Build folder is not uploaded due to size constraints, copy the "build" folder to the root path.
+
 # suryakamal
 
 Monitoring Application for Suryakamal
