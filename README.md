@@ -4,6 +4,8 @@ The Build folder is not uploaded due to size constraints, copy the "build" folde
 
 Monitoring Application for Suryakamal
 
+New addition from local, wooo!
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
