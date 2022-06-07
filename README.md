@@ -18,3 +18,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+Please Download and copy "build" folder into the main directory from the following link:
+https://drive.google.com/drive/folders/1RSCfFAzmrJFrLANn6IeCVIHplgzh_Heo?usp=sharing
+
+DO NOT SHARE THE BUILD FOLDER OR THIS REPO !!!!!!!!!!!!!!!!!!!!!!
