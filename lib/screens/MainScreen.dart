@@ -64,12 +64,27 @@ class _MainScreenState extends State<MainScreen> {
     return MaterialApp(
       home: SafeArea(
         child: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
+            brightness: Brightness.dark,
+            backgroundColor: Colors.deepPurple,
             centerTitle: true,
-            title: Text("Suryakamal"),
+            title: const Text(
+              "Suryakamal",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
           body: Container(
-            color: Colors.lightBlueAccent,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/logo.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
