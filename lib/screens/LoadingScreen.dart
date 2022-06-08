@@ -65,7 +65,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("images/logo.png"),
+            image: AssetImage("images/logo.jpg"),
             opacity: 0.2,
             fit: BoxFit.cover,
           ),
