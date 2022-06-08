@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:suryakamal/screens/MainScreen.dart';
+import 'package:suryakamal/screens/MainScreen.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -45,8 +45,8 @@ class _RegisterState extends State<Register> {
         Map<String, dynamic>? data = docSnapshot.data();
         mail = data?['email']; // <-- The value you want to retrieve.
         pass = data?['password'];
-//        print(mail);
-//        print(pass);
+        print(mail);
+        print(pass);
       }
       if (mail == email && pass == password) {
         prefs.setString('email', email);
@@ -152,7 +152,7 @@ class _RegisterState extends State<Register> {
                               type: PageTransitionType.fade,
                               duration: const Duration(seconds: 3),
                               //alignment: Alignment.center,
-                              child: const RegistrationScreen(),
+                              child: const MainScreen(),
                             ),
                             //MaterialPageRoute(builder: (context) {
                             //  return ;
