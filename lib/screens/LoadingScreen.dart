@@ -23,24 +23,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email');
     final password = prefs.getString('password');
-    print(email);
-    print(password);
+//    print(email);
+//    print(password);
 
     if ((email != null) && (password != null)) {
-      print("If Triggered");
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return MainScreen();
-      }));
-    } else {
-      print("Else Triggered");
-      Future.delayed(Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 3), () {
         Navigator.push(
           context,
           PageTransition(
             type: PageTransitionType.fade,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
             //alignment: Alignment.center,
-            child: RegistrationScreen(),
+            child: const MainScreen(),
+          ),
+          //MaterialPageRoute(builder: (context) {
+          //  return ;
+          //}),
+        );
+      });
+    } else {
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.fade,
+            duration: const Duration(seconds: 3),
+            //alignment: Alignment.center,
+            child: const RegistrationScreen(),
           ),
           //MaterialPageRoute(builder: (context) {
           //  return ;
@@ -54,14 +63,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage("images/logo.png"),
             opacity: 0.2,
             fit: BoxFit.cover,
           ),
         ),
-        child: Center(
+        child: const Center(
           child: SpinKitRotatingCircle(
             color: Colors.white,
             size: 50.0,
