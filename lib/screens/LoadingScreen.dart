@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:page_transition/page_transition.dart';
 //Importing Screens
 import 'package:suryakamal/screens/Registration_Screen.dart';
-import 'package:suryakamal/screens/MainScreen.dart';
+//import 'package:suryakamal/screens/MainScreen.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({Key? key}) : super(key: key);
@@ -34,7 +34,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             type: PageTransitionType.fade,
             duration: const Duration(seconds: 3),
             //alignment: Alignment.center,
-            child: const MainScreen(),
+            child: const RegistrationScreen(),
           ),
           //MaterialPageRoute(builder: (context) {
           //  return ;
