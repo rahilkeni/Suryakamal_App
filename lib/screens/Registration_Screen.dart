@@ -45,8 +45,6 @@ class _RegisterState extends State<Register> {
         Map<String, dynamic>? data = docSnapshot.data();
         mail = data?['email']; // <-- The value you want to retrieve.
         pass = data?['password'];
-        print(mail);
-        print(pass);
       }
       if (mail == email && pass == password) {
         prefs.setString('email', email);

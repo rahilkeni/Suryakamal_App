@@ -23,8 +23,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email');
     final password = prefs.getString('password');
-    //print(email);
-    //print(password);
+//    print(email);
+//    print(password);
 
     if ((email != null) && (password != null)) {
       Future.delayed(const Duration(seconds: 3), () {
@@ -34,7 +34,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             type: PageTransitionType.fade,
             duration: const Duration(seconds: 3),
             //alignment: Alignment.center,
-            child: const RegistrationScreen(),
+            child: const MainScreen(),
           ),
           //MaterialPageRoute(builder: (context) {
           //  return ;
@@ -49,7 +49,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             type: PageTransitionType.fade,
             duration: const Duration(seconds: 3),
             //alignment: Alignment.center,
-            child: const MainScreen(),
+            child: const RegistrationScreen(),
           ),
           //MaterialPageRoute(builder: (context) {
           //  return ;
@@ -65,7 +65,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("images/logo.jpg"),
+            image: AssetImage("images/logo.png"),
             opacity: 0.2,
             fit: BoxFit.cover,
           ),
