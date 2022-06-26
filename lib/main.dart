@@ -397,10 +397,60 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentTabIndex = 0;
+  int _currentTabIndex = 1;
   List<_EnergyData> data1 = [];
   List<_EnergyData> data2 = [];
   List<_EnergyData> data3 = [];
+  final fontColor = Color(0xFF2937B9);
+  var system_status = Colors.grey;
+  var system_temp = "50° C";
+
+  void getChartData(docSnapshot) {
+    var day1 = [];
+    var day2 = [];
+    var day3 = [];
+    Map<String, dynamic>? data = docSnapshot.data();
+    var d = [];
+    var val = [];
+    data?.forEach((key, value) {
+      d.add(key);
+      val.add(value);
+    });
+    day1 = val[0]['pwr'];
+    day2 = val[1]['pwr']; // <-- The value you want to retrieve.
+    day3 = val[2]['pwr']; // <-- The value you want to retrieve.
+    system_temp = val[0]['rpi_status']['temp'];
+    print(system_temp);
+
+    for (var i = 0; i < 9; i++) {
+      String c = "";
+      if (i < 3) {
+        c = "${(i + 9).toString()} am";
+      } else {
+        if (i == 3) {
+          c = "${(i + 9).toString()} pm";
+        } else {
+          c = "${(i - 3).toString()} pm";
+        }
+      }
+      data1.add(_EnergyData(c, day1[i]));
+      data2.add(_EnergyData(c, day2[i]));
+      data3.add(_EnergyData(c, day3[i]));
+    }
+  }
+
+  void getSystemData(docSnapshot) {
+    Map<String, dynamic>? data = docSnapshot.data();
+    var d = [];
+    var val = [];
+//    data?.forEach((key, value) {
+//      d.add(key);
+//      print(key);
+//      val.add(value);
+//    });
+    print("length ");
+    print(docSnapshot.size);
+  }
 
   Future<int> getAuth() async {
     await Firebase.initializeApp();
@@ -408,36 +458,9 @@ class _MainScreenState extends State<MainScreen> {
     try {
       var collection = FirebaseFirestore.instance.collection('User');
       var docSnapshot = await collection.doc('data').get();
-      var day1 = [];
-      var day2 = [];
-      var day3 = [];
       if (docSnapshot.exists) {
-        Map<String, dynamic>? data = docSnapshot.data();
-        var d = [];
-        var val = [];
-        data?.forEach((key, value) {
-          d.add(key);
-          val.add(value);
-        });
-        day1 = val[0]['pwr'];
-        day2 = val[1]['pwr']; // <-- The value you want to retrieve.
-        day3 = val[2]['pwr']; // <-- The value you want to retrieve.
-
-        for (var i = 0; i < 9; i++) {
-          String c = "";
-          if (i < 3) {
-            c = "${(i + 9).toString()} am";
-          } else {
-            if (i == 3) {
-              c = "${(i + 9).toString()} pm";
-            } else {
-              c = "${(i - 3).toString()} pm";
-            }
-          }
-          data1.add(_EnergyData(c, day1[i]));
-          data2.add(_EnergyData(c, day2[i]));
-          data3.add(_EnergyData(c, day3[i]));
-        }
+        getChartData(docSnapshot);
+        getSystemData(docSnapshot);
       }
       return 0;
     } catch (e) {
@@ -483,7 +506,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: 350,
                   child: SfCartesianChart(
 //                    plotAreaBackgroundColor: Color.fromRGBO(0, 0, 0, 0.4),
-                    backgroundColor: Color.fromARGB(40, 255, 255, 255),
+                    backgroundColor: Color.fromRGBO(255, 255, 255, 0.5),
                     zoomPanBehavior: _zoomPanBehavior,
                     title: ChartTitle(text: 'Energy Generated'),
                     plotAreaBorderWidth: 1,
@@ -505,7 +528,7 @@ class _MainScreenState extends State<MainScreen> {
                         majorTickLines: const MajorTickLines(size: 0)),
                     series: <ChartSeries<_EnergyData, String>>[
                       SplineAreaSeries<_EnergyData, String>(
-                        name: 'Day 1',
+                        name: "Day 1",
                         dataSource: data1,
                         color: const Color.fromRGBO(0, 135, 0, 0.43),
                         borderColor: const Color.fromRGBO(75, 135, 185, 1),
@@ -515,7 +538,7 @@ class _MainScreenState extends State<MainScreen> {
                             reading.rating,
                       ),
                       SplineAreaSeries<_EnergyData, String>(
-                        name: 'Day 2',
+                        name: "Day 2",
                         dataSource: data2,
                         color: const Color.fromRGBO(75, 135, 185, 0.6),
                         borderColor: const Color.fromRGBO(75, 135, 185, 1),
@@ -525,7 +548,7 @@ class _MainScreenState extends State<MainScreen> {
                             reading.rating,
                       ),
                       SplineAreaSeries<_EnergyData, String>(
-                        name: 'Day 3',
+                        name: "Day 3",
                         dataSource: data3,
                         color: const Color.fromRGBO(75, 135, 185, 0.4),
                         borderColor: const Color.fromRGBO(75, 110, 185, 1),
@@ -537,26 +560,822 @@ class _MainScreenState extends State<MainScreen> {
                     ],
                     tooltipBehavior: TooltipBehavior(enable: true),
                   ),
-                ),
+                ), //Chart
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+//                          width: 0.38 * MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color.fromRGBO(255, 255, 255, 0.5),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.only(right: 10),
+                                width: 100,
+                                alignment: Alignment.topCenter,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Energy Generated',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: fontColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "100 W",
+                                style: TextStyle(
+                                  color: fontColor,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]),
+                ), //Energy Generated
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 20.0,
+                    horizontal: 20.0,
+                  ),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+//                          width: 0.38 * MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color.fromRGBO(255, 255, 255, 0.5),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                width: 100,
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  'System Status',
+                                  style: TextStyle(
+                                    color: fontColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                    color: system_status,
+                                    shape: BoxShape.circle),
+                              )
+                            ],
+                          ),
+                        ),
+                        Container(
+//                          width: 0.38 * MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color.fromRGBO(255, 255, 255, 0.5),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.only(right: 10),
+                                width: 100,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  'System Temperature',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: fontColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                system_temp,
+                                style: TextStyle(
+                                  color: fontColor,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]),
+                ), //System Status & Temp
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20.0,
+                    horizontal: 20.0,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        top: 20.0, right: 20.0, left: 20.0, bottom: 5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: const Color.fromRGBO(255, 255, 255, 0.2),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 15.0),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlueAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Camera',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.deepPurple,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Active',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                    color: system_status,
+                                    shape: BoxShape.circle),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 15.0),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlueAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 13.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Motor Driver',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.deepPurple,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Active',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                    color: system_status,
+                                    shape: BoxShape.circle),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 15.0),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlueAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Motor 1',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.deepPurple,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Active',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                    color: system_status,
+                                    shape: BoxShape.circle),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 15.0),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlueAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Motor 2',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.deepPurple,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      width: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Active',
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                    color: system_status,
+                                    shape: BoxShape.circle),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ), // Status
               ],
             ),
           )
         ],
       ),
-      Container(
-        //Logs Tab
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("images/logo.jpg"),
-            fit: BoxFit.cover,
+      //Logs Tab
+      Stack(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/logo.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[],
-        ),
-      ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: (MediaQuery.of(context).size.height * 0.025),
+              horizontal: (MediaQuery.of(context).size.width * 0.05),
+            ),
+            child: Container(
+              padding: EdgeInsets.only(
+                top: (MediaQuery.of(context).size.height * 0.025),
+                right: (MediaQuery.of(context).size.width * 0.05),
+                left: (MediaQuery.of(context).size.width * 0.05),
+                bottom: (MediaQuery.of(context).size.width * 0.05),
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: const Color.fromRGBO(255, 255, 255, 0.2),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(
+                          bottom: (MediaQuery.of(context).size.height * 0.01)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Level',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Time',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+//                              horizontal:
+//                              (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.40),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Message',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.white,
+                      thickness: (MediaQuery.of(context).size.height * 0.002),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical:
+                              (MediaQuery.of(context).size.height * 0.01)),
+//                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.red,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '12:25:17',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+//                              horizontal:
+//                              (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.40),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'System Failure',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.white,
+                      thickness: (MediaQuery.of(context).size.height * 0.002),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical:
+                              (MediaQuery.of(context).size.height * 0.01)),
+//                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.warning,
+                              color: Colors.yellow,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '11:55:33',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+//                              horizontal:
+//                              (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.40),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Temperature Rising, May cause System Shutdown',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.white,
+                      thickness: (MediaQuery.of(context).size.height * 0.002),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical:
+                              (MediaQuery.of(context).size.height * 0.01)),
+//                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.info,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                              right: (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+                              horizontal:
+                                  (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.18),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '11:08:18',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical:
+                                  (MediaQuery.of(context).size.width * 0.01),
+//                              horizontal:
+//                              (MediaQuery.of(context).size.width * 0.02),
+                            ),
+                            width: (MediaQuery.of(context).size.width * 0.40),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'System Functioning Optimally',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.clip,
+                                color: Colors.deepPurple,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.white,
+                      thickness: (MediaQuery.of(context).size.height * 0.002),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ), // Status
       SingleChildScrollView(
         child: Padding(
           padding:
@@ -634,7 +1453,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-      ),
+      ), //Profile Tab
     ];
 
     final _kBottomNavBarItems = <BottomNavigationBarItem>[
@@ -698,65 +1517,3 @@ class _EnergyData {
   final String time;
   final double rating;
 }
-
-//      Container(
-//        decoration: new BoxDecoration(
-//          image: new DecorationImage(
-//            image: new AssetImage("images/logo.jpg"),
-//            fit: BoxFit.cover,
-//          ),
-//        ),
-//        child: Column(
-//          mainAxisAlignment: MainAxisAlignment.start,
-//          crossAxisAlignment: CrossAxisAlignment.stretch,
-//          children: <Widget>[
-//            SfCartesianChart(
-//              backgroundColor: Colors.white,
-//              zoomPanBehavior: _zoomPanBehavior,
-//              legend: Legend(
-//                  isVisible: true, opacity: 0.7, width: '10%', padding: 1.0),
-//              title: ChartTitle(text: 'Energy Generated'),
-//              plotAreaBorderWidth: 1,
-//              primaryXAxis: CategoryAxis(
-//                  interval: 0.5,
-//                  majorGridLines: const MajorGridLines(width: 0),
-//                  edgeLabelPlacement: EdgeLabelPlacement.shift),
-//              primaryYAxis: NumericAxis(
-//                  labelFormat: '{value}V',
-//                  axisLine: const AxisLine(width: 0),
-//                  majorGridLines: const MajorGridLines(width: 0),
-//                  majorTickLines: const MajorTickLines(size: 0)),
-//              series: <ChartSeries<_EnergyData, String>>[
-//                SplineAreaSeries<_EnergyData, String>(
-//                  name: 'Day 1',
-//                  dataSource: data1,
-//                  color: const Color.fromRGBO(75, 135, 185, 0.6),
-//                  borderColor: const Color.fromRGBO(75, 135, 185, 1),
-//                  borderWidth: 2,
-//                  xValueMapper: (_EnergyData reading, _) => reading.time,
-//                  yValueMapper: (_EnergyData reading, _) => reading.rating,
-//                ),
-//                SplineAreaSeries<_EnergyData, String>(
-//                  name: 'Day 2',
-//                  dataSource: data2,
-//                  color: const Color.fromRGBO(75, 135, 185, 0.6),
-//                  borderColor: const Color.fromRGBO(75, 135, 185, 1),
-//                  borderWidth: 2,
-//                  xValueMapper: (_EnergyData reading, _) => reading.time,
-//                  yValueMapper: (_EnergyData reading, _) => reading.rating,
-//                ),
-////                    SplineAreaSeries<_EnergyData, String>(
-////                      name: 'Day 3',
-////                      dataSource: data3,
-////                      color: const Color.fromRGBO(75, 135, 185, 0.6),
-////                      borderColor: const Color.fromRGBO(75, 135, 185, 1),
-////                      borderWidth: 2,
-////                      xValueMapper: (_EnergyData reading, _) => reading.time,
-////                      yValueMapper: (_EnergyData reading, _) => reading.rating,
-////                    ),
-//              ],
-//              tooltipBehavior: TooltipBehavior(enable: true),
-//            ),
-//          ],
-//        ),
-//      ),
